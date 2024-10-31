@@ -35,9 +35,11 @@ def program():
 
     # parse all the article info and get their htmls
     issue_htmls = parse.get_article_htmls(journal_data)
-    print(issue_htmls)
+    # print(issue_htmls)
 
     # parse article info and get data
+    # article_data = (
+    parse.get_articles_data(issue_htmls) # )
 
 
     # todo: put the info in a database format to file

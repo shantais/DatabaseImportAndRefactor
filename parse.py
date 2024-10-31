@@ -48,24 +48,31 @@ def get_article_htmls(journal_data):
     return all_htmls
 
 
-            # title = article.find('a').get_text().strip()
-            # print(title)
-            #
-            # year = article.find("li", class_="field-entry year yearField").find("span", class_="field-value").get_text().strip()
-            # print(year)
-            #
-            # pages = article.find("li", class_="field-entry pages pagesField").find("span", class_="field-value").get_text().strip()
-            # print(pages)
-            # if '-' in pages:
-            #     pages = pages.split('-')
-            # elif '–' in pages:
-            #     pages = pages.split('–')
-            #
-            # doi = article.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
-            # print(doi)
-            #
-            # abstract = article.find("div", class_="uk-margin-medium-top").get_text().strip()
-            # print(abstract)
+def get_articles_data(article_htmls):
+    for html in article_htmls:
+        html_soup = html_spoon(request_html.get_html(html))
+        print(html_soup)
+        title = html_soup.find('h1').get_text().strip()
+        print(title)
+
+        year = html_soup.find("li", class_="field-entry year yearField").find("span", class_="field-value").get_text().strip()
+        print(year)
+
+        pages = html_soup.find("li", class_="field-entry pages pagesField").find("span", class_="field-value").get_text().strip()
+        print(pages)
+        if '-' in pages:
+            pages = pages.split('-')
+        elif '–' in pages:
+            pages = pages.split('–')
+
+        doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
+        print(doi)
+
+        abstract = html_soup.find("div", class_="uk-margin-medium-top")
+        print(abstract)
+
+        # todo: get authors and their data
+        # todo: put the data in a list
 
 
 
