@@ -15,14 +15,22 @@ def program():
     # parsing home html
     home_spooned = parse.html_spoon(home_html)
     # print(home_spooned)  # prints it cleaned in text format
-    home_data = parse.home_database(home_spooned)
-    # print(home_data)  # has selected bits and pieces from the html soup
+    home_data = parse.home_database(home_spooned) # has selected bits and pieces from the html soup
+    # print(home_data)
 
     choice.helper(home_data)  # prints what's in the home data
 
     # starting the choice loop
     chosen_journal_number = choice.event(home_data)
 
+    # getting html from the chosen journal URL
+    journal_html = request_html.get_html(home_data[chosen_journal_number][1])
+    journal_spooned = parse.html_spoon(journal_html)
+    # print(journal_spooned)
+
+    # parsing the journal html
+    journal_data = parse.journal_database(home_url, journal_spooned)
+    basic_journal_info = parse.journal_basic_info_get(journal_spooned)
 
 
 if __name__ == '__main__':
