@@ -1,14 +1,16 @@
-import urllib.request
-import urllib.error
+import bs4
+import string
+
+def html_spoon(html_home):
+    html_soup = bs4.BeautifulSoup(html_home, 'html.parser')
+    return html_soup
 
 
-def get_html(url):
-    print('INFO: getting whole html from ' + url)
-
-    try:
-        with urllib.request.urlopen(url) as response:
-            html_content = response.read().decode()
-            print(html_content)
-
-    except urllib.error.URLError as e:
-        print(f"An error occurred: {e}")
+def home_database(html_soup):
+    data = []
+    print('')
+    for idx, item in enumerate(html_soup.find_all('a', class_="uk-link-reset")):
+        # print(item)
+        line = [idx+1, item['href'], item.get_text()]
+        data.append(line)
+    return data
