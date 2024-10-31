@@ -30,7 +30,17 @@ def program():
 
     # parsing the journal html
     journal_data = parse.journal_database(home_url, journal_spooned)
-    basic_journal_info = parse.journal_basic_info_get(journal_spooned)
+    print(journal_data)
+    basic_journal_info = parse.journal_basic_info_get(journal_spooned) # todo: use later for journal db content
+
+    # parse all the article info and get their htmls
+    issue_htmls = parse.get_article_htmls(journal_data)
+    print(issue_htmls)
+
+    # parse article info and get data
+
+
+    # todo: put the info in a database format to file
 
 
 if __name__ == '__main__':
