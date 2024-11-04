@@ -51,27 +51,41 @@ def get_article_htmls(journal_data):
 
 
 def get_articles_data(article_htmls):
+    article_info = []
     for html in article_htmls:
         html_soup = html_spoon(request_html.get_html(html))
-        print(html_soup)
+        # print(html_soup)
         title = html_soup.find('h1').get_text().strip()
-        print(title)
+        # print(title)
 
         year = html_soup.find("li", class_="field-entry year yearField").find("span", class_="field-value").get_text().strip()
-        print(year)
+        # print(year)
 
         pages = html_soup.find("li", class_="field-entry pages pagesField").find("span", class_="field-value").get_text().strip()
-        print(pages)
+        # print(pages)
         if '-' in pages:
             pages = pages.split('-')
         elif '–' in pages:
             pages = pages.split('–')
 
         doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
-        print(doi)
+        # print(doi)
 
-        abstract = html_soup.find("div", class_="uk-margin-medium-top")
-        print(abstract)
+        abstract_soup = []
+        reference_list = []
+        if html_soup.find("div", class_="uk-margin-medium-top"):
+            abstract_soup = html_soup.find("div", class_="uk-margin-medium-top").find_all("p")
+            reference_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("li")
+
+
+            for idx, p in enumerate(abstract_soup):
+                if p.get_text().strip() == "REFERENCES:":
+                    abstract_soup = abstract_soup[:idx]
+                # print(p)
+                # print(p.get_text().strip())
+            # print(abstract_soup)
+            # for r in reference_list:
+            #     print(r.get_text().strip())
 
         authors = []
         for idx in range(9, 0, -1):
@@ -93,10 +107,10 @@ def get_articles_data(article_htmls):
                 orcid = '-'
             authors.append([author, email, institution, orcid])
             authors = list(filter(lambda a: a != ['-', '-', '-', '-'], authors))
+        # print(authors)
 
-        print(authors)
-
-        # todo: put the data in a list
+        article_info.append([title,abstract_soup, reference_list, authors, year, pages, doi])
+    return article_info
 
 
 

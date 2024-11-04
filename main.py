@@ -38,9 +38,8 @@ def program():
     # print(issue_htmls)
 
     # parse article info and get data
-    # article_data = (
-    parse.get_articles_data(issue_htmls) # )
-
+    article_data = (parse.get_articles_data(issue_htmls))
+    print(article_data)
 
     # todo: put the info in a database format to file
 
