@@ -1,3 +1,5 @@
+from os.path import exists
+
 import bs4
 import request_html
 
@@ -71,7 +73,29 @@ def get_articles_data(article_htmls):
         abstract = html_soup.find("div", class_="uk-margin-medium-top")
         print(abstract)
 
-        # todo: get authors and their data
+        authors = []
+        for idx in range(9, 0, -1):
+            if html_soup.find("li", class_=f"field-entry author-{idx} authorField"):
+                author = html_soup.find("li", class_=f"field-entry author-{idx} authorField").find("span", class_="field-value").get_text().strip()
+            else:
+                author = '-'
+            if html_soup.find("li", class_=f"field-entry author-{idx} authorField"):
+                email = html_soup.find("li", class_=f"field-entry author-{idx} authorField").find("span", class_="field-value").get_text().strip()
+            else:
+                email = '-'
+            if html_soup.find("li", class_=f"field-entry institution-{idx} institutionField"):
+                institution = html_soup.find("li", class_=f"field-entry institution-{idx} institutionField").find("span", class_="field-value").get_text().strip()
+            else:
+                institution = '-'
+            if html_soup.find("li", class_=f"field-entry orcid-{idx} orcidField"):
+                orcid = html_soup.find("li", class_=f"field-entry orcid-{idx} orcidField").find("span", class_="field-value").get_text().strip()
+            else:
+                orcid = '-'
+            authors.append([author, email, institution, orcid])
+            authors = list(filter(lambda a: a != ['-', '-', '-', '-'], authors))
+
+        print(authors)
+
         # todo: put the data in a list
 
 

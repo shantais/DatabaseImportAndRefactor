@@ -3,7 +3,9 @@ import urllib.error
 
 
 def get_html(url):
+    print('')
     print('INFO: getting whole html from ' + url)
+    print('')
 
     try:
         with urllib.request.urlopen(url) as response:
