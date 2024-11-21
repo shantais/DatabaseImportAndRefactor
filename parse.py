@@ -95,6 +95,8 @@ def get_articles_data(article_htmls):
             pages = pages.split('-')
         elif '–' in pages:
             pages = pages.split('–')
+        else:
+            pages = [pages, pages]
 
         doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
         # print(doi)
@@ -119,6 +121,10 @@ def get_articles_data(article_htmls):
             # for r in reference_list:
             #     print(r.get_text().strip())
 
+            # input_values = [input_tag.get("value", '') for input_tag in find_info.find_all('input')]
+        keywords = [keyword.get_text().strip() for keyword in html_soup.find_all("a", class_="label label-info")]
+        # print(keywords)
+
         authors = []
         for idx in range(9, 0, -1):
             if html_soup.find("li", class_=f"field-entry author-{idx} authorField"):
@@ -141,10 +147,5 @@ def get_articles_data(article_htmls):
             authors = list(filter(lambda a: a != ['-', '-', '-', '-'], authors))
         # print(authors)
 
-        article_info.append([journal, title, abstract_soup, reference_list, authors, year, pages, doi, volume, issue])
+        article_info.append([title, abstract_soup, keywords, reference_list, authors, year, pages, doi, journal, volume, issue])
     return article_info
-
-
-
-
-

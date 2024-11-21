@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2ae33e6e-d21e-477f-82ab-4db4dba4696e" name="Changes" comment="Working in issue parsing">
+    <list default="true" id="2ae33e6e-d21e-477f-82ab-4db4dba4696e" name="Changes" comment="idea change, won't put the db formatting at this stage, will make a data file as a middle point">
+      <change afterPath="$PROJECT_DIR$/json_formatting.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/make_dictionary.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db_formatting.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_formatting.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
@@ -171,7 +173,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732205779860</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="idea change, won't put the db formatting at this stage, will make a data file as a middle point">
+      <option name="closed" value="true" />
+      <created>1732209500799</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1732209500799</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -195,20 +205,26 @@
     <MESSAGE value="extracting author data" />
     <MESSAGE value="cutting off excess data in abstract soup" />
     <MESSAGE value="Working in issue parsing" />
-    <option name="LAST_COMMIT_MESSAGE" value="Working in issue parsing" />
+    <MESSAGE value="idea change, won't put the db formatting at this stage, will make a data file as a middle point" />
+    <option name="LAST_COMMIT_MESSAGE" value="idea change, won't put the db formatting at this stage, will make a data file as a middle point" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/main.py</url>
-          <line>39</line>
+          <line>42</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/main.py</url>
-          <line>44</line>
+          <line>50</line>
           <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>53</line>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

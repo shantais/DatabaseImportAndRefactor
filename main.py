@@ -1,4 +1,5 @@
 import identifier
+import make_dictionary
 import request_html
 import parse
 import choice
@@ -35,18 +36,26 @@ def program():
     # print(journal_data)
     # print(issue_data)
     basic_journal_info = parse.journal_basic_info_get(journal_spooned, home_data[chosen_journal_number])
+    journal_dict = make_dictionary.journal(basic_journal_info)
+    print(journal_dict)
 
     # parse all the article info and get their htmls
     article_htmls, basic_issue_data = parse.get_article_htmls_and_basic_issue_data(journal_data, issue_data)
     # print(article_htmls)
     # print(basic_issue_data)
 
+    issue_dict = make_dictionary.issue(basic_issue_data, basic_journal_info)
+    print(issue_dict)
+
     # parse article info and get data
     article_data = (parse.get_articles_data(article_htmls))
     # print(article_data)
 
-    # todo: put the info in a database format to file
-    create_db(basic_journal_info, basic_issue_data, article_data)
+    article_dict, author_dict = make_dictionary.article_and_author(article_data)
+    print(article_dict)
+    print(author_dict)
+
+    # create_db(basic_journal_info, basic_issue_data, article_data)
 
 
 if __name__ == '__main__':
