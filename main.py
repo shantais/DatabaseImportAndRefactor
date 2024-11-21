@@ -33,13 +33,13 @@ def program():
     # parsing the journal html
     journal_data, issue_data = parse.journal_database(home_url, journal_spooned)
     # print(journal_data)
-    print(issue_data)
+    # print(issue_data)
     basic_journal_info = parse.journal_basic_info_get(journal_spooned, home_data[chosen_journal_number])
 
     # parse all the article info and get their htmls
     article_htmls, basic_issue_data = parse.get_article_htmls_and_basic_issue_data(journal_data, issue_data)
-    print(article_htmls)
-    print(basic_issue_data)
+    # print(article_htmls)
+    # print(basic_issue_data)
 
     # parse article info and get data
     article_data = (parse.get_articles_data(article_htmls))

@@ -20,7 +20,7 @@ def journal_database(home_url, journal_soup):
     journal_data = []
     issue_data = []
     ul_class = journal_soup.find_all('h3', class_='page-header item-title')
-    print(ul_class)
+    # print(ul_class)
     for idx, item in enumerate(ul_class):
         details = item.find('a')
         if not item.find('span'):
@@ -51,7 +51,7 @@ def journal_basic_info_get(journal_soup, home_data):
 def get_article_htmls_and_basic_issue_data(journal_data, issue_data):
     # j_d (idx, html, issue num)
     # i_d (idx, html, vol num)
-    # result -> i_d ([vol num, issue num, ..., issue num], ...)
+    # result -> i_d ([vol num, [issue num, ..., issue num]], ...)
 
     basic_issue_data = []
     all_htmls = []
@@ -61,8 +61,7 @@ def get_article_htmls_and_basic_issue_data(journal_data, issue_data):
         for issue in journal_data:
             if volume[1] in issue[1]:
                 all_issues.append(issue[2])
-
-            print(issue)
+            # print(issue)
             html = html_spoon(request_html.get_html(issue[1]))
             # print(html)
             article_class = html.find_all("article", class_='uk-article')
@@ -79,10 +78,10 @@ def get_articles_data(article_htmls):
     article_info = []
     for html in article_htmls:
         html_soup = html_spoon(request_html.get_html(html[0]))
-        print(html_soup)
+        # print(html_soup)
 
         journal = html_soup.find("li", class_="field-entry year yearField").find("span", class_="field-value").get_text().strip()
-        print(journal)
+        # print(journal)
 
         title = html_soup.find('h1').get_text().strip()
         # print(title)
@@ -103,7 +102,6 @@ def get_articles_data(article_htmls):
         volume = html[1]
 
         issue = html[2]
-
 
         abstract_soup = []
         reference_list = []

@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2ae33e6e-d21e-477f-82ab-4db4dba4696e" name="Changes" comment="cutting off excess data in abstract soup">
-      <change afterPath="$PROJECT_DIR$/db_formatting.py" afterDir="false" />
+    <list default="true" id="2ae33e6e-d21e-477f-82ab-4db4dba4696e" name="Changes" comment="Working in issue parsing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db_formatting.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_formatting.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/parse.py" beforeDir="false" afterPath="$PROJECT_DIR$/parse.py" afterDir="false" />
     </list>
@@ -163,7 +163,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730752289073</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Working in issue parsing">
+      <option name="closed" value="true" />
+      <created>1732205779860</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1732205779860</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -186,7 +194,8 @@
     <MESSAGE value="sorting article data" />
     <MESSAGE value="extracting author data" />
     <MESSAGE value="cutting off excess data in abstract soup" />
-    <option name="LAST_COMMIT_MESSAGE" value="cutting off excess data in abstract soup" />
+    <MESSAGE value="Working in issue parsing" />
+    <option name="LAST_COMMIT_MESSAGE" value="Working in issue parsing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
