@@ -1,5 +1,3 @@
-from os.path import exists
-
 import bs4
 import request_html
 
@@ -19,42 +17,73 @@ def home_database(html_soup):
     return data
 
 def journal_database(home_url, journal_soup):
-    data = []
+    journal_data = []
+    issue_data = []
     ul_class = journal_soup.find_all('h3', class_='page-header item-title')
     print(ul_class)
     for idx, item in enumerate(ul_class):
+        details = item.find('a')
         if not item.find('span'):
-            details = item.find('a')
             line = [idx, home_url + details['href'], details.get_text().strip()]
-            data.append(line)
-    return data
+            journal_data.append(line)
+        else:
+            line = [idx, home_url + details['href'], details.get_text().strip()]
+            issue_data.append(line)
+
+    return journal_data, issue_data
 
 
-def journal_basic_info_get(journal_soup):
+def journal_basic_info_get(journal_soup, home_data):
     find_info = journal_soup.find("form", class_="magazineData mceNonEditable")
     # print(find_info)
     input_values = [input_tag.get("value", '') for input_tag in find_info.find_all('input')]
+    input_values.insert(0, home_data[2])
+
+    if str(home_data[1]).split("/")[4] == "10-15804":
+        abbr = str(home_data[1]).split("/")[5]
+    else:
+        abbr = str(home_data[1]).split("/")[4]
+
+    input_values.insert(1, abbr)
     # print(input_values)
     return input_values
 
-def get_article_htmls(journal_data):
-    all_htmls = []
-    for issue in journal_data:
-        html = html_spoon(request_html.get_html(issue[1]))
-        # print(html)
-        article_class = html.find_all("article", class_='uk-article')
-        # print(article_class)
-        for article in article_class:
-            all_htmls.append(article.get("data-permalink", ''))
+def get_article_htmls_and_basic_issue_data(journal_data, issue_data):
+    # j_d (idx, html, issue num)
+    # i_d (idx, html, vol num)
+    # result -> i_d ([vol num, issue num, ..., issue num], ...)
 
-    return all_htmls
+    basic_issue_data = []
+    all_htmls = []
+
+    for volume in issue_data:
+        all_issues = []
+        for issue in journal_data:
+            if volume[1] in issue[1]:
+                all_issues.append(issue[2])
+
+            print(issue)
+            html = html_spoon(request_html.get_html(issue[1]))
+            # print(html)
+            article_class = html.find_all("article", class_='uk-article')
+            # print(article_class)
+            for article in article_class:
+                if volume[1] in article.get("data-permalink", ''):
+                    all_htmls.append([article.get("data-permalink", ''), volume[2], issue[2]])
+        basic_issue_data.append([volume[2], all_issues])
+
+    return all_htmls, basic_issue_data
 
 
 def get_articles_data(article_htmls):
     article_info = []
     for html in article_htmls:
-        html_soup = html_spoon(request_html.get_html(html))
-        # print(html_soup)
+        html_soup = html_spoon(request_html.get_html(html[0]))
+        print(html_soup)
+
+        journal = html_soup.find("li", class_="field-entry year yearField").find("span", class_="field-value").get_text().strip()
+        print(journal)
+
         title = html_soup.find('h1').get_text().strip()
         # print(title)
 
@@ -70,6 +99,11 @@ def get_articles_data(article_htmls):
 
         doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
         # print(doi)
+
+        volume = html[1]
+
+        issue = html[2]
+
 
         abstract_soup = []
         reference_list = []
@@ -109,7 +143,7 @@ def get_articles_data(article_htmls):
             authors = list(filter(lambda a: a != ['-', '-', '-', '-'], authors))
         # print(authors)
 
-        article_info.append([title,abstract_soup, reference_list, authors, year, pages, doi])
+        article_info.append([journal, title, abstract_soup, reference_list, authors, year, pages, doi, volume, issue])
     return article_info
 
 

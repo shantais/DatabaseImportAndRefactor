@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2ae33e6e-d21e-477f-82ab-4db4dba4696e" name="Changes" comment="extracting author data">
+    <list default="true" id="2ae33e6e-d21e-477f-82ab-4db4dba4696e" name="Changes" comment="cutting off excess data in abstract soup">
+      <change afterPath="$PROJECT_DIR$/db_formatting.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/parse.py" beforeDir="false" afterPath="$PROJECT_DIR$/parse.py" afterDir="false" />
@@ -47,7 +48,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Python.main.executor": "Run",
+    "Python.main.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
     "last_opened_file_path": "C:/Users/annaw/PycharmProjects/pythonProject1"
@@ -154,7 +155,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730726341267</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="cutting off excess data in abstract soup">
+      <option name="closed" value="true" />
+      <created>1730752289073</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1730752289073</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -176,15 +185,21 @@
     <MESSAGE value="getting all article htmls" />
     <MESSAGE value="sorting article data" />
     <MESSAGE value="extracting author data" />
-    <option name="LAST_COMMIT_MESSAGE" value="extracting author data" />
+    <MESSAGE value="cutting off excess data in abstract soup" />
+    <option name="LAST_COMMIT_MESSAGE" value="cutting off excess data in abstract soup" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/parse.py</url>
-          <line>86</line>
-          <option name="timeStamp" value="7" />
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>39</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>44</line>
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

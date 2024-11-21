@@ -2,6 +2,8 @@ import identifier
 import request_html
 import parse
 import choice
+import db_formatting
+from db_formatting import create_db
 
 
 def program():
@@ -29,19 +31,22 @@ def program():
     # print(journal_spooned)
 
     # parsing the journal html
-    journal_data = parse.journal_database(home_url, journal_spooned)
-    print(journal_data)
-    basic_journal_info = parse.journal_basic_info_get(journal_spooned) # todo: use later for journal db content
+    journal_data, issue_data = parse.journal_database(home_url, journal_spooned)
+    # print(journal_data)
+    print(issue_data)
+    basic_journal_info = parse.journal_basic_info_get(journal_spooned, home_data[chosen_journal_number])
 
     # parse all the article info and get their htmls
-    issue_htmls = parse.get_article_htmls(journal_data)
-    # print(issue_htmls)
+    article_htmls, basic_issue_data = parse.get_article_htmls_and_basic_issue_data(journal_data, issue_data)
+    print(article_htmls)
+    print(basic_issue_data)
 
     # parse article info and get data
-    article_data = (parse.get_articles_data(issue_htmls))
-    print(article_data)
+    article_data = (parse.get_articles_data(article_htmls))
+    # print(article_data)
 
     # todo: put the info in a database format to file
+    create_db(basic_journal_info, basic_issue_data, article_data)
 
 
 if __name__ == '__main__':
