@@ -32,17 +32,18 @@ def program():
 
     # parsing the journal html into a dictionary
     journal_data, issue_data = parse.journal_data_pieced(home_url, journal_spooned)
-    print(journal_data)
-    print(issue_data)
+    # print(journal_data)
+    # print(issue_data)
 
     journal_dict = parse.journal_dict_parsing(journal_spooned, home_data[chosen_journal_number])
-    # print(journal_dict)
+    print(journal_dict)
 
     # parse all the article info and get their htmls
-    article_htmls, issue_dict =parse.get_article_htmls_and_issue_dict(journal_data, issue_data, journal_dict)
-    article_htmls, basic_issue_data = parse.get_article_htmls_and_basic_issue_data(journal_data, issue_data)
+    # update journal dict by issues and volumes
+    article_htmls, journal_dict = parse.get_article_htmls(journal_data, issue_data, journal_dict)
     print(article_htmls)
-    print(basic_issue_data)
+    print(journal_dict)
+    print("\n")
 
     issue_dict = make_dictionary.issue(basic_issue_data, basic_journal_info)
     print(issue_dict)

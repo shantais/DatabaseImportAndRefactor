@@ -57,46 +57,26 @@ def journal_dict_parsing(journal_spooned, home_data):
     }}
     return journal_dict
 
-
-def get_article_htmls_and_issue_dict(journal_data, issue_data, journal_dict):
-    j_abbr = list(journal_dict.keys())[0]
-    issue_dict = {j_abbr: {"journal": journal_dict[j_abbr]["name"]}}
-
+def get_article_htmls(journal_data, issue_data, journal_dict):
     article_htmls = []
-    for volume in issue_data:
-        for issue in journal_data:
-            if volume[1] in issue[1]:
-                issue_dict[j_abbr] = {volume[2]: issue[2]}
-                print(volume)
-                print(issue)
-
-    print(issue_dict)
-    return article_htmls, issue_dict
-
-def get_article_htmls_and_basic_issue_data(journal_data, issue_data):
-    # j_d (idx, html, issue num)
-    # i_d (idx, html, vol num)
-    # result -> i_d ([vol num, [issue num, ..., issue num]], ...)
-
-    basic_issue_data = []
-    all_htmls = []
+    j_abbr = list(journal_dict.keys())[0]
+    # journal_dict[j_abbr] = {}
 
     for volume in issue_data:
-        all_issues = []
         for issue in journal_data:
-            if volume[1] in issue[1]:
-                all_issues.append(issue[2])
-            print(issue)
-            html = html_spoon(request_html.get_html(issue[1]))
-            print(html)
+            if volume[0] in issue[0]:
+                journal_dict[j_abbr].update({volume[1]: issue[1]})
+                # print(volume)
+                # print(issue)
+            html = html_spoon(request_html.get_html(issue[0]))
+            # print(html)
             article_class = html.find_all("article", class_='uk-article')
-            print(article_class)
+            # print(article_class)
             for article in article_class:
-                if volume[1] in article.get("data-permalink", ''):
-                    all_htmls.append([article.get("data-permalink", ''), volume[2], issue[2]])
-        basic_issue_data.append([volume[2], all_issues])
+                if volume[0] in article.get("data-permalink", ''):
+                    article_htmls.append([article.get("data-permalink", ''), volume[1], issue[1]])
 
-    return all_htmls, basic_issue_data
+    return article_htmls, journal_dict
 
 
 def get_articles_data(article_htmls):
@@ -174,4 +154,5 @@ def get_articles_data(article_htmls):
 
         article_info.append([title, abstract_soup, keywords, reference_list, authors, year, pages, doi, journal, volume, issue])
     return article_info
+
 
