@@ -1,4 +1,5 @@
 import identifier
+import json_formatting
 import make_dictionary
 import request_html
 import parse
@@ -51,9 +52,14 @@ def program():
     article_data = (parse.get_articles_data(article_htmls))
     # print(article_data)
 
+
     article_dict, author_dict = make_dictionary.article_and_author(article_data)
     print(article_dict)
     print(author_dict)
+
+
+    # creating json file
+    json_formatting.create_json(journal_dict, issue_dict, article_dict, author_dict)
 
     # create_db(basic_journal_info, basic_issue_data, article_data)
 
