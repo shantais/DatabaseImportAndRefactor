@@ -16,7 +16,7 @@ def home_database(html_soup):
         data.append(line)
     return data
 
-def journal_database(home_url, journal_soup):
+def journal_data_pieced(home_url, journal_soup):
     journal_data = []
     issue_data = []
     ul_class = journal_soup.find_all('h3', class_='page-header item-title')
@@ -24,17 +24,16 @@ def journal_database(home_url, journal_soup):
     for idx, item in enumerate(ul_class):
         details = item.find('a')
         if not item.find('span'):
-            line = [idx, home_url + details['href'], details.get_text().strip()]
+            line = [home_url + details['href'], details.get_text().strip()]
             journal_data.append(line)
         else:
-            line = [idx, home_url + details['href'], details.get_text().strip()]
+            line = [home_url + details['href'], details.get_text().strip()]
             issue_data.append(line)
 
     return journal_data, issue_data
 
-
-def journal_basic_info_get(journal_soup, home_data):
-    find_info = journal_soup.find("form", class_="magazineData mceNonEditable")
+def journal_dict_parsing(journal_spooned, home_data):
+    find_info = journal_spooned.find("form", class_="magazineData mceNonEditable")
     # print(find_info)
     input_values = [input_tag.get("value", '') for input_tag in find_info.find_all('input')]
     input_values.insert(0, home_data[2])
@@ -45,8 +44,34 @@ def journal_basic_info_get(journal_soup, home_data):
         abbr = str(home_data[1]).split("/")[4]
 
     input_values.insert(1, abbr)
-    # print(input_values)
-    return input_values
+    print(input_values)
+    # ['Medical Forum', 'mf', 'Półrocznik', 'XII', '2956-8099', '', 'medical sciences, health sciences, pharmacology and pharmacy, physical culture science']
+
+    journal_dict = {input_values[0]: {
+        "abbr": input_values[1],
+        "freq": input_values[2],
+        "months": input_values[3],
+        "issn": input_values[4],
+        "discipline_pl": input_values[5],
+        "discipline_en": input_values[6]
+    }}
+    return journal_dict
+
+
+def get_article_htmls_and_issue_dict(journal_data, issue_data, journal_dict):
+    j_abbr = list(journal_dict.keys())[0]
+    issue_dict = {j_abbr: {"journal": journal_dict[j_abbr]["name"]}}
+
+    article_htmls = []
+    for volume in issue_data:
+        for issue in journal_data:
+            if volume[1] in issue[1]:
+                issue_dict[j_abbr] = {volume[2]: issue[2]}
+                print(volume)
+                print(issue)
+
+    print(issue_dict)
+    return article_htmls, issue_dict
 
 def get_article_htmls_and_basic_issue_data(journal_data, issue_data):
     # j_d (idx, html, issue num)
@@ -61,11 +86,11 @@ def get_article_htmls_and_basic_issue_data(journal_data, issue_data):
         for issue in journal_data:
             if volume[1] in issue[1]:
                 all_issues.append(issue[2])
-            # print(issue)
+            print(issue)
             html = html_spoon(request_html.get_html(issue[1]))
-            # print(html)
+            print(html)
             article_class = html.find_all("article", class_='uk-article')
-            # print(article_class)
+            print(article_class)
             for article in article_class:
                 if volume[1] in article.get("data-permalink", ''):
                     all_htmls.append([article.get("data-permalink", ''), volume[2], issue[2]])
@@ -149,3 +174,4 @@ def get_articles_data(article_htmls):
 
         article_info.append([title, abstract_soup, keywords, reference_list, authors, year, pages, doi, journal, volume, issue])
     return article_info
+

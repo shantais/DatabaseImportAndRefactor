@@ -1,30 +1,3 @@
-def journal(basic_journal_info):
-
-    # ['Medical Forum', 'mf', 'Półrocznik', 'XII', '2956-8099', '', 'medical sciences, health sciences, pharmacology and pharmacy, physical culture science']
-    journal_dict = {
-        "name": basic_journal_info[0],
-        "abbr": basic_journal_info[1],
-        "freq": basic_journal_info[2],
-        "months": basic_journal_info[3],
-        "issn": basic_journal_info[4],
-        "discipline_pl": basic_journal_info[5],
-        "discipline_en": basic_journal_info[6]
-    }
-    return journal_dict
-
-
-def issue(basic_issue_data, basic_journal_info):
-    issue_dict = {}
-    for v in enumerate(basic_issue_data):
-        # print(v)
-        for idx, i in enumerate(v[1]):
-            issue_dict[idx+1] = {}
-            issue_dict[idx+1]["journal"] = basic_journal_info[0]
-            issue_dict[idx+1]["volume"] = v[0]
-            issue_dict[idx+1]["issue"] = i
-    return issue_dict
-
-
 def article_and_author(article_data):
     article_dict = {}
     author_dict = {}
