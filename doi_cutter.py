@@ -1,0 +1,1 @@
+# todo: make 2 dictionaries that will cut the doi address for journal and issue respectively

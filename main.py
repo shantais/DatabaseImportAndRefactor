@@ -36,30 +36,21 @@ def program():
     # print(issue_data)
 
     journal_dict = parse.journal_dict_parsing(journal_spooned, home_data[chosen_journal_number])
-    print(journal_dict)
+    # print(journal_dict)
 
     # parse all the article info and get their htmls
     # update journal dict by issues and volumes
     article_htmls, journal_dict = parse.get_article_htmls(journal_data, issue_data, journal_dict)
-    print(article_htmls)
-    print(journal_dict)
-    print("\n")
-
-    issue_dict = make_dictionary.issue(basic_issue_data, basic_journal_info)
-    print(issue_dict)
+    # print(article_htmls)
+    # print(journal_dict)
 
     # parse article info and get data
-    article_data = (parse.get_articles_data(article_htmls))
-    # print(article_data)
-
-
-    article_dict, author_dict = make_dictionary.article_and_author(article_data)
-    print(article_dict)
-    print(author_dict)
-
+    journal_dict = parse.get_articles_data(article_htmls, journal_dict)
+    # print(journal_dict)
+    print("\n")
 
     # creating json file
-    json_formatting.create_json(journal_dict, issue_dict, article_dict, author_dict)
+    json_formatting.create_json(journal_dict)
 
     # create_db(basic_journal_info, basic_issue_data, article_data)
 
