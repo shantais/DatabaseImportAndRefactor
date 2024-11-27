@@ -1,11 +1,20 @@
-import json_formatting
+import json
+import os
 
 
 def rw(journal_dict):
 
-    # creating json file
-    journal_json = json_formatting.create_json(journal_dict)
+    file_name = "journals_data.json"
+    journal_name = journal_dict['name']
+    journal_dict.pop('name')
 
-    # todo: read the file and update existing json if exists
-    with open("journals.json", mode="rw", encoding="utf-8") as file:
-        file.write(journal_json)
+    if os.path.exists(file_name):
+        # read existing file and update new data
+        with open(file_name, mode="r", encoding="utf-8") as f:
+            journals_loaded_dict = json.load(f)
+        journals_loaded_dict.update({journal_name: journal_dict})
+    else:
+        journals_loaded_dict = {journal_name: journal_dict}
+
+    with open(file_name, mode="w", encoding="utf-8") as f:
+        json.dump(journals_loaded_dict, f, indent=4)

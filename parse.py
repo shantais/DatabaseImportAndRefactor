@@ -46,28 +46,27 @@ def journal_dict_parsing(journal_spooned, home_data):
         abbr = str(home_data[1]).split("/")[4]
 
     input_values.insert(1, abbr)
-    print(input_values)
-    # ['Medical Forum', 'mf', 'Półrocznik', 'XII', '2956-8099', '', 'medical sciences, health sciences, pharmacology and pharmacy, physical culture science']
+    # print(input_values)
 
-    journal_dict = {input_values[0]: {
+    journal_dict = {
+        "name": input_values[0],
         "abbr": input_values[1],
         "freq": input_values[2],
         "months": input_values[3],
         "issn": input_values[4],
         "discipline_pl": input_values[5],
         "discipline_en": input_values[6]
-    }}
+    }
     return journal_dict
 
 def get_article_htmls(journal_data, issue_data, journal_dict):
     article_htmls = []
-    j_name = list(journal_dict.keys())[0]
     # journal_dict[j_name] = {}
 
     for volume in issue_data:
         for issue in journal_data:
             if volume[0] in issue[0]:
-                journal_dict[j_name].update({volume[1]: issue[1]})
+                journal_dict.update({volume[1]: issue[1]})
                 # print(volume)
                 # print(issue)
             html = html_spoon(request_html.get_html(issue[0]))
@@ -82,7 +81,6 @@ def get_article_htmls(journal_data, issue_data, journal_dict):
 
 
 def get_articles_data(article_htmls, journal_dict):
-    j_name = list(journal_dict.keys())[0]
     # print(journal_dict)
     # print(json_formatting.create_json(journal_dict))
 
@@ -123,7 +121,6 @@ def get_articles_data(article_htmls, journal_dict):
         doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
         doi_j, doi_i = doi_cutter.cut(doi, doi_j, doi_i)
         # print(doi)
-        print(doi_j + ' ' + doi_i)
 
         abstract_list = []
         reference_list = []
@@ -180,10 +177,9 @@ def get_articles_data(article_htmls, journal_dict):
                 author = html_soup.find("li", class_=f"field-entry author-{idx} authorField").find("span", class_="field-value").get_text().strip()
             else:
                 author = '-'
-            if html_soup.find("li", class_=f"field-entry author-{idx} authorField"):
-                email = html_soup.find("li", class_=f"field-entry author-{idx} authorField").find("span", class_="field-value").get_text().strip()
+            if html_soup.find("li", class_=f"field-entry email-{idx} authorMail"):
+                email = html_soup.find("li", class_=f"field-entry email-{idx} authorMail").find("span", class_="field-value").get_text().strip()
             else:
-                # todo: actual email pls
                 email = '-'
             if html_soup.find("li", class_=f"field-entry institution-{idx} institutionField"):
                 institution = html_soup.find("li", class_=f"field-entry institution-{idx} institutionField").find("span", class_="field-value").get_text().strip()
@@ -227,14 +223,14 @@ def get_articles_data(article_htmls, journal_dict):
                         "pages": pages,
                         "authors": authors_dict}
 
-        issue_dict.update({titles[0]: article_dict,
-                           "doi": doi_i})
+        issue_dict.update({"doi": doi_i,
+                           titles[0]: article_dict})
 
         volume_dict.update({"year": year,
                             issue: issue_dict})
 
-        journal_dict[j_name].update({"doi": doi_j,
-                                     volume: volume_dict})
+        journal_dict.update({"doi": doi_j,
+                             volume: volume_dict})
 
     return journal_dict
 
