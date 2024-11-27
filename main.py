@@ -47,7 +47,6 @@ def program():
     # parse article info and get data
     journal_dict = parse.get_articles_data(article_htmls, journal_dict)
     # print(journal_dict)
-    print("\n")
 
     # creating json file
     json_formatting.create_json(journal_dict)

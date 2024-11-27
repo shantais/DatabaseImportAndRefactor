@@ -1,6 +1,5 @@
 import bs4
 import request_html
-import json_formatting
 
 
 def html_spoon(html_home):
@@ -88,7 +87,7 @@ def get_articles_data(article_htmls, journal_dict):
     issue_dict = {}
     volume_dict = {}
 
-    # chcecking if volume or issue changed (y-year, i-issue)
+    # checking if volume or issue changed (y-year, i-issue)
     y = 0
     i = "-"
 
@@ -128,10 +127,12 @@ def get_articles_data(article_htmls, journal_dict):
                     abstract_list = abstract_list[:idx]
 
             reference_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("li")
-
         abstracts = []
         if len(abstract_list) > 0:
-            abstracts = [abstract.get_text().strip() for abstract in abstract_list]
+            for abstract in abstract_list:
+                if abstract.get_text().strip() != "":
+                    abstracts.append(abstract.get_text().strip())
+
         if len(abstracts) == 4:
             titles.append(abstracts[0])
             titles.append(abstracts[2])
@@ -145,12 +146,16 @@ def get_articles_data(article_htmls, journal_dict):
                 titles.append(abstracts[1])
                 abstracts.pop(1)
         elif len(abstracts) == 2:
-            if len(abstracts[0]) <= len(titles[0])+20 and len(abstracts[1]) <= len(titles[0])+20:
+            if (len(abstracts[0]) <= len(titles[0])+20 or len(abstracts[0]) <= 400) and (len(abstracts[1]) <= len(titles[0])+20 or len(abstracts[1]) <= 400):
                 titles.append(abstracts[1])
                 titles.append(abstracts[0])
                 abstracts.pop(1)
                 abstracts.pop(0)
             else:
+                titles.append(abstracts[0])
+                abstracts.pop(0)
+        elif len(abstracts) == 1:
+            if len(abstracts[0]) <= len(titles[0]) + 20 or len(abstracts[0]) <= 400:
                 titles.append(abstracts[0])
                 abstracts.pop(0)
         references = []
@@ -196,7 +201,15 @@ def get_articles_data(article_htmls, journal_dict):
                 # first iteration so assign values - no problems
                 y = year
                 i = issue
-            # elif
+            elif y != year:
+                # year changed so automatically we have a new issue
+                issue_dict = {}
+                volume_dict = {}
+                y = year
+            elif i != issue:
+                # need to clear issue so that we won't have dupes from previous in the next one
+                issue_dict = {}
+                i = issue
 
         article_dict = {"titles": titles,
                         "abstracts": abstracts,
@@ -208,11 +221,10 @@ def get_articles_data(article_htmls, journal_dict):
 
         issue_dict.update({titles[0]: article_dict})
 
-        volume_dict.update({"year": year})
+        volume_dict.update({"year": year,
+                            issue: issue_dict})
 
         journal_dict[j_name].update({volume: volume_dict})
-        print(json_formatting.create_json(journal_dict))
 
     return journal_dict
-
 
