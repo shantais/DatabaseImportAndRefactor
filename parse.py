@@ -1,4 +1,6 @@
 import bs4
+
+import doi_cutter
 import request_html
 
 
@@ -91,6 +93,10 @@ def get_articles_data(article_htmls, journal_dict):
     y = 0
     i = "-"
 
+    # doi marker
+    doi_j = "-"
+    doi_i = "-"
+
     for html in article_htmls:
 
         html_soup = html_spoon(request_html.get_html(html[0]))
@@ -115,7 +121,9 @@ def get_articles_data(article_htmls, journal_dict):
             pages = [pages, pages]
 
         doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
+        doi_j, doi_i = doi_cutter.cut(doi, doi_j, doi_i)
         # print(doi)
+        print(doi_j + ' ' + doi_i)
 
         abstract_list = []
         reference_list = []
@@ -219,12 +227,14 @@ def get_articles_data(article_htmls, journal_dict):
                         "pages": pages,
                         "authors": authors_dict}
 
-        issue_dict.update({titles[0]: article_dict})
+        issue_dict.update({titles[0]: article_dict,
+                           "doi": doi_i})
 
         volume_dict.update({"year": year,
                             issue: issue_dict})
 
-        journal_dict[j_name].update({volume: volume_dict})
+        journal_dict[j_name].update({"doi": doi_j,
+                                     volume: volume_dict})
 
     return journal_dict
 

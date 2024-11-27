@@ -1,9 +1,8 @@
 import identifier
-import json_formatting
-import make_dictionary
 import request_html
 import parse
 import choice
+import rw_file
 
 
 def program():
@@ -48,10 +47,8 @@ def program():
     journal_dict = parse.get_articles_data(article_htmls, journal_dict)
     # print(journal_dict)
 
-    # creating json file
-    json_formatting.create_json(journal_dict)
-
-    # create_db(basic_journal_info, basic_issue_data, article_data)
+    # add to file
+    rw_file.rw(journal_dict)
 
 
 if __name__ == '__main__':
