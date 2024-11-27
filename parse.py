@@ -37,44 +37,65 @@ def journal_data_pieced(home_url, journal_soup):
 def journal_dict_parsing(journal_spooned, home_data):
     find_info = journal_spooned.find("form", class_="magazineData mceNonEditable")
     # print(find_info)
-    input_values = [input_tag.get("value", '') for input_tag in find_info.find_all('input')]
-    input_values.insert(0, home_data[2])
+    if find_info is not None:
+        input_values = [input_tag.get("value", '') for input_tag in find_info.find_all('input')]
+        input_values.insert(0, home_data[2])
 
-    if str(home_data[1]).split("/")[4] == "10-15804":
-        abbr = str(home_data[1]).split("/")[5]
+        if str(home_data[1]).split("/")[4] == "10-15804":
+            abbr = str(home_data[1]).split("/")[5]
+        else:
+            abbr = str(home_data[1]).split("/")[4]
+
+        input_values.insert(1, abbr)
+        # print(input_values)
+
+        journal_dict = {
+            "name": input_values[0],
+            "abbr": input_values[1],
+            "freq": input_values[2],
+            "months": input_values[3],
+            "issn": input_values[4],
+            "discipline_pl": input_values[5],
+            "discipline_en": input_values[6]
+        }
     else:
-        abbr = str(home_data[1]).split("/")[4]
+        name = home_data[2]
+        if str(home_data[1]).split("/")[4] == "10-15804":
+            abbr = str(home_data[1]).split("/")[5]
+        else:
+            abbr = str(home_data[1]).split("/")[4]
 
-    input_values.insert(1, abbr)
-    # print(input_values)
-
-    journal_dict = {
-        "name": input_values[0],
-        "abbr": input_values[1],
-        "freq": input_values[2],
-        "months": input_values[3],
-        "issn": input_values[4],
-        "discipline_pl": input_values[5],
-        "discipline_en": input_values[6]
-    }
+        journal_dict = {"name": name,
+                        "abbr": abbr,
+                        "freq": 'Rocznik',
+                        "months": "XII",
+                        "issn": "2956-4875"
+        }
     return journal_dict
 
 def get_article_htmls(journal_data, issue_data, journal_dict):
     article_htmls = []
     # journal_dict[j_name] = {}
 
-    for volume in issue_data:
-        for issue in journal_data:
+    print(journal_data)
+    print(issue_data)
+    print('\n')
+
+    for issue in journal_data:
+        html = html_spoon(request_html.get_html(issue[0]))
+        # print(html)
+        article_class = html.find_all("article", class_='uk-article')
+        # print(article_class)
+
+        for volume in issue_data:
             if volume[0] in issue[0]:
                 journal_dict.update({volume[1]: issue[1]})
                 # print(volume)
                 # print(issue)
-            html = html_spoon(request_html.get_html(issue[0]))
-            # print(html)
-            article_class = html.find_all("article", class_='uk-article')
-            # print(article_class)
+
+
             for article in article_class:
-                if volume[0] in article.get("data-permalink", ''):
+                if volume[0] in article.get("data-permalink", '') and article.get("data-permalink", '') not in article_htmls:
                     article_htmls.append([article.get("data-permalink", ''), volume[1], issue[1]])
 
     return article_htmls, journal_dict
@@ -118,9 +139,10 @@ def get_articles_data(article_htmls, journal_dict):
         else:
             pages = [pages, pages]
 
-        doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
-        doi_j, doi_i = doi_cutter.cut(doi, doi_j, doi_i)
-        # print(doi)
+        if html_soup.find("li", class_="field-entry doi-number doiField"):
+            doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
+            doi_j, doi_i = doi_cutter.cut(doi, doi_j, doi_i)
+            # print(doi)
 
         abstract_list = []
         reference_list = []
@@ -144,7 +166,7 @@ def get_articles_data(article_htmls, journal_dict):
             abstracts.pop(2)
             abstracts.pop(0)
         elif len(abstracts) == 3:
-            if len(abstracts[0]) < abstracts[1]:
+            if len(abstracts[0]) < len(abstracts[1]):
                 titles.append(abstracts[0])
                 abstracts.pop(0)
             else:
