@@ -77,9 +77,9 @@ def get_article_htmls(journal_data, issue_data, journal_dict):
     article_htmls = []
     # journal_dict[j_name] = {}
 
-    print(journal_data)
-    print(issue_data)
-    print('\n')
+    # print(journal_data)
+    # print(issue_data)
+    # print('\n')
 
     for issue in journal_data:
         html = html_spoon(request_html.get_html(issue[0]))
@@ -141,6 +141,8 @@ def get_articles_data(article_htmls, journal_dict):
 
         if html_soup.find("li", class_="field-entry doi-number doiField"):
             doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
+            if "http://dx.doi.org" in doi:
+                doi = "https://doi.org" + doi[17:]
             doi_j, doi_i = doi_cutter.cut(doi, doi_j, doi_i)
             # print(doi)
 
