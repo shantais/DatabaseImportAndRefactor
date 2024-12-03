@@ -4,7 +4,7 @@ import os
 
 def rw(journal_dict):
 
-    file_name = "journals_data.json"
+    file_name = "journals_data3.json"
     journal_name = journal_dict['name']
     journal_dict.pop('name')
 

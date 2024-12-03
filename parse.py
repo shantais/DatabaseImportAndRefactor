@@ -130,8 +130,12 @@ def get_articles_data(article_htmls, journal_dict):
         titles = [html_soup.find('h1').get_text().strip()]
         # print(titles)
 
-        pages = html_soup.find("li", class_="field-entry pages pagesField").find("span", class_="field-value").get_text().strip()
+        if html_soup.find("li", class_="field-entry pages pagesField"):
+            pages = html_soup.find("li", class_="field-entry pages pagesField").find("span", class_="field-value").get_text().strip()
+        else:
+            pages = input()
         # print(pages)
+
         if '-' in pages:
             pages = pages.split('-')
         elif '–' in pages:
