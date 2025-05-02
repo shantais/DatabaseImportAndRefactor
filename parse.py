@@ -8,7 +8,6 @@ def html_spoon(html_home):
     html_soup = bs4.BeautifulSoup(html_home, 'html.parser')
     return html_soup
 
-
 def home_database(html_soup):
     data = []
     print('')
@@ -113,6 +112,7 @@ def get_articles_data(article_htmls, journal_dict):
     i = "-"
 
     # doi marker
+    doi = "-"
     doi_j = "-"
     doi_i = "-"
 
@@ -128,7 +128,7 @@ def get_articles_data(article_htmls, journal_dict):
         # print(year)
 
         titles = [html_soup.find('h1').get_text().strip()]
-        # print(titles)
+        print(titles)
 
         if html_soup.find("li", class_="field-entry pages pagesField"):
             pages = html_soup.find("li", class_="field-entry pages pagesField").find("span", class_="field-value").get_text().strip()
@@ -156,41 +156,27 @@ def get_articles_data(article_htmls, journal_dict):
 
             abstract_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("p")
             for idx, p in enumerate(abstract_list):
-                if p.get_text().strip() == "REFERENCES:":
+                if p.get_text().strip() == "REFERENCES:" or p.get_text().strip() == "References:":
                     abstract_list = abstract_list[:idx]
 
             reference_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("li")
-        abstracts = []
-        if len(abstract_list) > 0:
-            for abstract in abstract_list:
-                if abstract.get_text().strip() != "":
-                    abstracts.append(abstract.get_text().strip())
 
-        if len(abstracts) == 4:
-            titles.append(abstracts[0])
-            titles.append(abstracts[2])
-            abstracts.pop(2)
-            abstracts.pop(0)
-        elif len(abstracts) == 3:
-            if len(abstracts[0]) < len(abstracts[1]):
-                titles.append(abstracts[0])
-                abstracts.pop(0)
+        abstracts = []
+        print("Abstract List")
+        print(abstract_list)
+        for idx, abstract in enumerate(abstract_list):
+            if abstract.find("strong") or abstract.find("b"):
+                titles.append(abstract.get_text().strip())
+            if abstract.get_text().strip() == '':
+                pass
             else:
-                titles.append(abstracts[1])
-                abstracts.pop(1)
-        elif len(abstracts) == 2:
-            if (len(abstracts[0]) <= len(titles[0])+20 or len(abstracts[0]) <= 400) and (len(abstracts[1]) <= len(titles[0])+20 or len(abstracts[1]) <= 400):
-                titles.append(abstracts[1])
-                titles.append(abstracts[0])
-                abstracts.pop(1)
-                abstracts.pop(0)
-            else:
-                titles.append(abstracts[0])
-                abstracts.pop(0)
-        elif len(abstracts) == 1:
-            if len(abstracts[0]) <= len(titles[0]) + 20 or len(abstracts[0]) <= 400:
-                titles.append(abstracts[0])
-                abstracts.pop(0)
+                abstracts.append(abstract.get_text().strip())
+
+        print("Abstracts")
+        print(abstracts)
+        print("Titles")
+        print(titles)
+
         references = []
         if len(reference_list) > 0:
             references = [reference.get_text().strip() for reference in reference_list]

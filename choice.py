@@ -22,4 +22,5 @@ def event(choice_list):
 
         if not found:
             print('That\'s not a valid command.')
+    return None
 
