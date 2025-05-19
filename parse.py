@@ -113,8 +113,8 @@ def get_articles_data(article_htmls, journal_dict):
 
     # doi marker
     doi = "-"
-    doi_j = "-"
-    doi_i = "-"
+    doi_journal = "-"
+    doi_issue = "-"
 
     for html in article_htmls:
 
@@ -147,7 +147,12 @@ def get_articles_data(article_htmls, journal_dict):
             doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
             if "http://dx.doi.org" in doi:
                 doi = "https://doi.org" + doi[17:]
-            doi_j, doi_i = doi_cutter.cut(doi, doi_j, doi_i)
+
+        if doi_journal == '-':
+            doi_journal = doi_cutter.group(doi)
+
+
+            # doi_j, doi_i = doi_cutter.cut(doi, doi_j, doi_i)
             # print(doi)
 
         abstract_list = []
@@ -156,7 +161,9 @@ def get_articles_data(article_htmls, journal_dict):
 
             abstract_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("p")
             for idx, p in enumerate(abstract_list):
-                if p.get_text().strip() == "REFERENCES:" or p.get_text().strip() == "References:":
+                if (p.get_text().strip().upper() == "REFERENCES:"
+                        or p.get_text().strip().upper() == "BIBLIOGRAPHY:"
+                        or p.get_text().strip().upper() == "BIBLIOGRAFIA:"):
                     abstract_list = abstract_list[:idx]
 
             reference_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("li")
@@ -237,13 +244,13 @@ def get_articles_data(article_htmls, journal_dict):
                         "pages": pages,
                         "authors": authors_dict}
 
-        issue_dict.update({"doi": doi_i,
+        issue_dict.update({"doi": doi_issue,
                            titles[0]: article_dict})
 
         volume_dict.update({"year": year,
                             issue: issue_dict})
 
-        journal_dict.update({"doi": doi_j,
+        journal_dict.update({"doi": doi_journal,
                              volume: volume_dict})
 
     return journal_dict
