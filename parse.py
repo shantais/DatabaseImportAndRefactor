@@ -82,8 +82,12 @@ def get_article_htmls(journal_data, issue_data, journal_dict):
 
     for issue in journal_data:
         html = html_spoon(request_html.get_html(issue[0]))
+        if html is None:
+            continue
         # print(html)
         article_class = html.find_all("article", class_='uk-article')
+        if not article_class:
+            continue
         # print(article_class)
 
         for volume in issue_data:
@@ -117,141 +121,144 @@ def get_articles_data(article_htmls, journal_dict):
     doi_issue = "-"
 
     for html in article_htmls:
+        try:
+            html_soup = html_spoon(request_html.get_html(html[0]))
+            # print(html_soup)
 
-        html_soup = html_spoon(request_html.get_html(html[0]))
-        # print(html_soup)
+            volume = html[1]
+            issue = html[2]
 
-        volume = html[1]
-        issue = html[2]
+            year = html_soup.find("li", class_="field-entry year yearField").find("span", class_="field-value").get_text().strip()
+            # print(year)
 
-        year = html_soup.find("li", class_="field-entry year yearField").find("span", class_="field-value").get_text().strip()
-        # print(year)
+            titles = [html_soup.find('h1').get_text().strip()]
+            print(titles)
 
-        titles = [html_soup.find('h1').get_text().strip()]
-        print(titles)
-
-        if html_soup.find("li", class_="field-entry pages pagesField"):
-            pages = html_soup.find("li", class_="field-entry pages pagesField").find("span", class_="field-value").get_text().strip()
-        else:
-            pages = input()
-        # print(pages)
-
-        if '-' in pages:
-            pages = pages.split('-')
-        elif '–' in pages:
-            pages = pages.split('–')
-        else:
-            pages = [pages, pages]
-
-        if html_soup.find("li", class_="field-entry doi-number doiField"):
-            doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
-            if "http://dx.doi.org" in doi:
-                doi = "https://doi.org" + doi[17:]
-
-        if doi_journal == '-':
-            doi_journal = doi_cutter.group(doi)
-
-
-            # doi_j, doi_i = doi_cutter.cut(doi, doi_j, doi_i)
-            # print(doi)
-
-        abstract_list = []
-        reference_list = []
-        if html_soup.find("div", class_="uk-margin-medium-top"):
-
-            abstract_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("p")
-            for idx, p in enumerate(abstract_list):
-                if (p.get_text().strip().upper() == "REFERENCES:"
-                        or p.get_text().strip().upper() == "BIBLIOGRAPHY:"
-                        or p.get_text().strip().upper() == "BIBLIOGRAFIA:"):
-                    abstract_list = abstract_list[:idx]
-
-            reference_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("li")
-
-        abstracts = []
-        print("Abstract List")
-        print(abstract_list)
-        for idx, abstract in enumerate(abstract_list):
-            if abstract.find("strong") or abstract.find("b"):
-                titles.append(abstract.get_text().strip())
-            if abstract.get_text().strip() == '':
-                pass
+            if html_soup.find("li", class_="field-entry pages pagesField"):
+                pages = html_soup.find("li", class_="field-entry pages pagesField").find("span", class_="field-value").get_text().strip()
             else:
-                abstracts.append(abstract.get_text().strip())
+                pages = '0-0'
+            # print(pages)
 
-        print("Abstracts")
-        print(abstracts)
-        print("Titles")
-        print(titles)
-
-        references = []
-        if len(reference_list) > 0:
-            references = [reference.get_text().strip() for reference in reference_list]
-
-        keywords = [keyword.get_text().strip() for keyword in html_soup.find_all("a", class_="label label-info")]
-        # print(keywords)
-
-        authors = []
-        authors_dict = {}
-        for idx in range(9, 0, -1):
-            if html_soup.find("li", class_=f"field-entry author-{idx} authorField"):
-                author = html_soup.find("li", class_=f"field-entry author-{idx} authorField").find("span", class_="field-value").get_text().strip()
+            if '-' in pages:
+                pages = pages.split('-')
+            elif '–' in pages:
+                pages = pages.split('–')
             else:
-                author = '-'
-            if html_soup.find("li", class_=f"field-entry email-{idx} authorMail"):
-                email = html_soup.find("li", class_=f"field-entry email-{idx} authorMail").find("span", class_="field-value").get_text().strip()
-            else:
-                email = '-'
-            if html_soup.find("li", class_=f"field-entry institution-{idx} institutionField"):
-                institution = html_soup.find("li", class_=f"field-entry institution-{idx} institutionField").find("span", class_="field-value").get_text().strip()
-            else:
-                institution = '-'
-            if html_soup.find("li", class_=f"field-entry orcid-{idx} orcidField"):
-                orcid = html_soup.find("li", class_=f"field-entry orcid-{idx} orcidField").find("span", class_="field-value").get_text().strip()
-            else:
-                orcid = '-'
-            authors.append([author, email, institution, orcid])
-            authors = list(filter(lambda a: a != ['-', '-', '-', '-'], authors))
-            for auth in authors:
-                authors_dict.update({auth[0]: {
-                    "e-mail": auth[1],
-                    "institution": auth[2],
-                    "orcid": auth[3]
-                }})
-        # print(authors)
-        # print(authors_dict)
+                pages = [pages, pages]
 
-        if y != year or i != issue:
-            if y == 0:
-                # first iteration so assign values - no problems
-                y = year
-                i = issue
-            elif y != year:
-                # year changed so automatically we have a new issue
-                issue_dict = {}
-                volume_dict = {}
-                y = year
-            elif i != issue:
-                # need to clear issue so that we won't have dupes from previous in the next one
-                issue_dict = {}
-                i = issue
+            if html_soup.find("li", class_="field-entry doi-number doiField"):
+                doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
+                if "http://dx.doi.org" in doi:
+                    doi = "https://doi.org" + doi[17:]
 
-        article_dict = {"titles": titles,
-                        "abstracts": abstracts,
-                        "keywords": keywords,
-                        "references": references,
-                        "doi": doi,
-                        "pages": pages,
-                        "authors": authors_dict}
+            if doi_journal == '-':
+                doi_journal = doi_cutter.group(doi)
 
-        issue_dict.update({"doi": doi_issue,
-                           titles[0]: article_dict})
 
-        volume_dict.update({"year": year,
-                            issue: issue_dict})
+                # doi_j, doi_i = doi_cutter.cut(doi, doi_j, doi_i)
+                # print(doi)
 
-        journal_dict.update({"doi": doi_journal,
-                             volume: volume_dict})
+            abstract_list = []
+            reference_list = []
+            if html_soup.find("div", class_="uk-margin-medium-top"):
+
+                abstract_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("p")
+                for idx, p in enumerate(abstract_list):
+                    if (p.get_text().strip().upper() == "REFERENCES:"
+                            or p.get_text().strip().upper() == "BIBLIOGRAPHY:"
+                            or p.get_text().strip().upper() == "BIBLIOGRAFIA:"):
+                        abstract_list = abstract_list[:idx]
+
+                reference_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("li")
+
+            abstracts = []
+            print("Abstract List")
+            print(abstract_list)
+            for idx, abstract in enumerate(abstract_list):
+                if abstract.find("strong") or abstract.find("b"):
+                    titles.append(abstract.get_text().strip())
+                if abstract.get_text().strip() == '':
+                    pass
+                else:
+                    abstracts.append(abstract.get_text().strip())
+
+            print("Abstracts")
+            print(abstracts)
+            print("Titles")
+            print(titles)
+
+            references = []
+            if len(reference_list) > 0:
+                references = [reference.get_text().strip() for reference in reference_list]
+
+            keywords = [keyword.get_text().strip() for keyword in html_soup.find_all("a", class_="label label-info")]
+            # print(keywords)
+
+            authors = []
+            authors_dict = {}
+            for idx in range(9, 0, -1):
+                if html_soup.find("li", class_=f"field-entry author-{idx} authorField"):
+                    author = html_soup.find("li", class_=f"field-entry author-{idx} authorField").find("span", class_="field-value").get_text().strip()
+                else:
+                    author = '-'
+                if html_soup.find("li", class_=f"field-entry email-{idx} authorMail"):
+                    email = html_soup.find("li", class_=f"field-entry email-{idx} authorMail").find("span", class_="field-value").get_text().strip()
+                else:
+                    email = '-'
+                if html_soup.find("li", class_=f"field-entry institution-{idx} institutionField"):
+                    institution = html_soup.find("li", class_=f"field-entry institution-{idx} institutionField").find("span", class_="field-value").get_text().strip()
+                else:
+                    institution = '-'
+                if html_soup.find("li", class_=f"field-entry orcid-{idx} orcidField"):
+                    orcid = html_soup.find("li", class_=f"field-entry orcid-{idx} orcidField").find("span", class_="field-value").get_text().strip()
+                else:
+                    orcid = '-'
+                authors.append([author, email, institution, orcid])
+                authors = list(filter(lambda a: a != ['-', '-', '-', '-'], authors))
+                for auth in authors:
+                    authors_dict.update({auth[0]: {
+                        "e-mail": auth[1],
+                        "institution": auth[2],
+                        "orcid": auth[3]
+                    }})
+            # print(authors)
+            # print(authors_dict)
+
+            if y != year or i != issue:
+                if y == 0:
+                    # first iteration so assign values - no problems
+                    y = year
+                    i = issue
+                elif y != year:
+                    # year changed so automatically we have a new issue
+                    issue_dict = {}
+                    volume_dict = {}
+                    y = year
+                elif i != issue:
+                    # need to clear issue so that we won't have dupes from previous in the next one
+                    issue_dict = {}
+                    i = issue
+
+            article_dict = {"titles": titles,
+                            "abstracts": abstracts,
+                            "keywords": keywords,
+                            "references": references,
+                            "doi": doi,
+                            "pages": pages,
+                            "authors": authors_dict}
+
+            issue_dict.update({"doi": doi_issue,
+                               titles[0]: article_dict})
+
+            volume_dict.update({"year": year,
+                                issue: issue_dict})
+
+            journal_dict.update({"doi": doi_journal,
+                                 volume: volume_dict})
+        except Exception as e:
+            print(f"Skipping article due to error: {e}\nHTML: {html}")
+            continue
 
     return journal_dict
 

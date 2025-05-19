@@ -4,7 +4,7 @@ import urllib.error
 
 def get_html(url):
     print('')
-    print('INFO: getting whole html from ' + url)
+    print(f"\nINFO: getting whole html from {url}\n")
     print('')
 
     try:
@@ -15,3 +15,4 @@ def get_html(url):
 
     except urllib.error.URLError as e:
         print(f"An error occurred: {e}")
+        return None
