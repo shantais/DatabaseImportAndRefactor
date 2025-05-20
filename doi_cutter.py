@@ -1,129 +1,101 @@
 import re
 
-def cut(doi, doi_j, doi_i):
-    if doi_j == '-':
-        doi_j = doi[:27]
+import re
 
-    # print("doi_i: " + doi_i + "\ndoi:   " + doi)
-    if (doi_i == '-') or (doi_i not in doi and doi != '-'):
-        doi_i = doi[:37]
-    return doi_j, doi_i
+# Define known journal DOI formats
+patterns = {
+    "CDM": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>CDM)\.(?P<year>\d{4})\.(?P<issue>\d{1,2})\.(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}.{m.group('year')}.{m.group('issue')}"
+    },
+    "MF": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>MF)\.(?P<year>\d{4})(?P<issue>\d{1})(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}.{m.group('year')}{m.group('issue')}"
+    },
+    "ve": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>ve)\.(?P<year>\d{4})\.(?P<issue>\d{2})\.(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}.{m.group('year')}.{m.group('issue')}"
+    },
+    "CCNiW": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>CCNiW)\.(?P<year>\d{4})\.(?P<issue>\d{2})\.(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}.{m.group('year')}.{m.group('issue')}"
+    },
+    "CPLS": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>CPLS)\.(?P<year>\d{4})(?P<issue>\d)(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}.{m.group('year')}{m.group('issue')}"
+    },
+    "sdhw": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>sdhw)\.(?P<year>\d{4})\.(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}.{m.group('year')}"
+    },
+    "CEJSS": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>CEJSS)\.(?P<year>\d{4})(?P<issue>\d)(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}.{m.group('year')}{m.group('issue')}"
+    },
+    "sal": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>sal)(?P<year>\d{4})(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}{m.group('year')}"
+    },
+    "so": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>so)(?P<year>\d{4})(?P<issue>\d)(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}{m.group('year')}{m.group('issue')}"
+    },
+    "rop": [
+        {
+            # Pattern with 1-digit issue number
+            "regex": r"^https://doi\.org/10\.15804/(?P<journal>rop)(?P<year>\d{4})(?P<issue>\d)(?P<article>\d{2})$",
+            "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+            "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}{m.group('year')}{m.group('issue')}"
+        },
+        {
+            # Pattern without issue number (defaults to year only)
+            "regex": r"^https://doi\.org/10\.15804/(?P<journal>rop)(?P<year>\d{4})(?P<article>\d{2})$",
+            "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+            "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}{m.group('year')}"
+        }
+    ],
+    "pbs": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>pbs)\.(?P<year>\d{4})\.(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}.{m.group('year')}"
+    },
+    "pomi": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>pomi)(?P<year>\d{4})(?P<article>\d{2})$",
+        "build_journal": lambda m: "https://doi.org/10.15804/pomi",
+        "build_issue": lambda m: f"https://doi.org/10.15804/pomi{m.group('year')}"
+    },
+    "PPUSN": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>PPUSN)\.(?P<year>\d{4})\.(?P<issue>\d{2})\.(?P<article>\d{2})$",
+        "build_journal": lambda m: "https://doi.org/10.15804/pomi",
+        "build_issue": lambda m: f"https://doi.org/10.15804/pomi.{m.group('year')}.{m.group('issue')}"
+    },
+    "PPUSI": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>PPUSI)\.(?P<year>\d{4})\.(?P<issue>\d{2})\.(?P<article>\d{2})$",
+        "build_journal": lambda m: "https://doi.org/10.15804/pomi",
+        "build_issue": lambda m: f"https://doi.org/10.15804/pomi.{m.group('year')}.{m.group('issue')}"
+    },
+    "athena": {
+        "regex": r"^https://doi\.org/10\.15804/(?P<journal>athena)\.(?P<year>\d{4})\.(?P<volume>\d{1,3})\.(?P<article>\d{2})$",
+        "build_journal": lambda m: f"https://doi.org/10.15804/{m.group('journal')}",
+        "build_issue": lambda m: f"https://doi.org/10.15804/{m.group('journal')}.{m.group('year')}.{m.group('volume')}"
+    }
 
-def group (doi):
+}
 
-    suffix_patterns = [r"(\d{4})(\d{2})",
-                       r".(\d{4})(\d{2})",
-                       r"(\d{4}).(\d{2})",
-                       r".(\d{4}).(\d{2})",
-                       r"(\d{2})(\d{1})(\d{2})",
-                       r".(\d{2})(\d{1})(\d{2})",
-                       r"(\d{2}).(\d{1}).(\d{2})",
-                       r".(\d{2}).(\d{1}).(\d{2})",
-                       r"(\d{2})(\d{2})(\d{2})",
-                       r".(\d{2})(\d{2})(\d{2})",
-                       r".(\d{2}).(\d{2}).(\d{2})",
-                       r"(\d{4})(\d{1})(\d{2})",
-                       r".(\d{4})(\d{1})(\d{2})",
-                       r"(\d{4})(\d{2})(\d{2})",
-                       r".(\d{4})(\d{2})(\d{2})",
-                       r"(\d{4}).(\d{1}).(\d{2})",
-                       r".(\d{4}).(\d{1}).(\d{2})",
-                       r"(\d{4}).(\d{2}).(\d{2})",
-                       r".(\d{4}).(\d{2}).(\d{2})",
-                       r".(\d{2}).(\d{2}).(\d{1}).(\d{2})",
-                       r".(\d{4}).(\d{2}).(\d{1}).(\d{2})"]
-
-    middle_patterns = ["pomi",
-                       "PPUSN",
-                       "PPUSI",
-                       "ppk",
-                       "ppsy",
-                       "athena",
-                       "em",
-                       "hso",
-                       "IW",
-                       "npw",
-                       "aoto",
-                       "ap",
-                       "ksm",
-                       "kie",
-                       "pbs",
-                       "rop",
-                       "so",
-                       "sal",
-                       "tpn",
-                       "ppsy",
-                       "tner",
-                       "sdhw",
-                       "MF",
-                       "CEJSS",
-                       "ve",
-                       "CDM",
-                       "CCNiW",
-                       "CPLS",
-                       "ajepss"]
-
-    prefix =  "https://doi.org/10.15804/"
-
-    journal = "-"
-    doi_journal = "-"
-    doi_journal_temp = "-"
-    doi_issue = "-"
-
-    for middle_pattern in middle_patterns:
-        # Create a regex pattern that allows for the middle pattern to appear anywhere after the prefix
-        pattern = prefix + r"(.*" + middle_pattern + r".*)"
-
-        # Search for the match in the DOI
-        match = re.search(pattern, doi)
-
+def group_cut(doi, build):
+    for journal_key, config in patterns.items():
+        match = re.match(config["regex"], doi)
         if match:
-            journal = middle_pattern
-
-            if journal == "PPUSN" or journal == "PPUSI" or journal == "pomi":
-                doi_journal = prefix + "PPUSN" + "."
-                if journal == "pomi":
-                    doi_journal_temp = prefix + journal
-                if journal == "PPUSI":
-                    doi_journal_temp = prefix + journal + "."
-            else:
-                doi_journal = prefix + journal
-            print(f"Match found for middle pattern '{middle_pattern}':")
-            print(doi_journal)
-            break
-        else:
-            print(f"No match found for {middle_pattern}")
-
-    for suffix_pattern in suffix_patterns:
-        # Choose correct journal base
-        base = doi_journal_temp if journal in ["PPUSI", "pomi"] else doi_journal
-
-        # Compile pattern to match full DOI exactly
-        full_pattern = re.compile(re.escape(base) + suffix_pattern + r"$")
-
-        # Try full match
-        match = full_pattern.fullmatch(doi)
-
-        if match:
-            groups = match.groups()
-
-            # Reconstruct doi_issue by stripping the last group (and separator if present)
-            if len(groups) > 1:
-                trimmed_groups = groups[:-1]  # remove last group
-                # Remove preceding dot if applicable
-                if '.' in suffix_pattern or '-' in suffix_pattern:
-                    doi_issue = base + '.'.join(trimmed_groups)
-                else:
-                    doi_issue = base + ''.join(trimmed_groups)
-            else:
-                doi_issue = base  # nothing to trim
-
-            print(f"Match found for suffix '{suffix_pattern}':")
-            print(f"doi_issue = '{doi_issue}'")
-            break
-        else:
-            print(f"No match found for {suffix_pattern}")
-
-
-    return doi_journal, doi_issue
-
+            cut_doi = config[build](match)
+            return cut_doi
+    # fallback:
+    return "-"
