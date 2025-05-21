@@ -123,13 +123,13 @@ def get_articles_data(article_htmls, journal_dict):
     for html in article_htmls:
         try:
             html_soup = html_spoon(request_html.get_html(html[0]))
-            # print(html_soup)
+            print(html_soup)
 
             volume = html[1]
             issue = html[2]
 
             year = html_soup.find("li", class_="field-entry year yearField").find("span", class_="field-value").get_text().strip()
-            # print(year)
+            print(year)
 
             titles = [html_soup.find('h1').get_text().strip()]
             print(titles)
@@ -138,92 +138,134 @@ def get_articles_data(article_htmls, journal_dict):
                 pages = html_soup.find("li", class_="field-entry pages pagesField").find("span", class_="field-value").get_text().strip()
             else:
                 pages = '0-0'
-            # print(pages)
+            print(pages)
 
-            if '-' in pages:
-                pages = pages.split('-')
-            elif '–' in pages:
-                pages = pages.split('–')
+            pages = ''.join(pages.split())  # Remove all whitespace
+
+            # Try to split on the first non-digit character
+            for idx, ch in enumerate(pages):
+                if not ch.isdigit():
+                    pages = [pages[:idx], pages[idx + 1:]]
+                    break
             else:
+                # No separator found — assume single page
                 pages = [pages, pages]
+
+            print(pages)
 
             if html_soup.find("li", class_="field-entry doi-number doiField"):
                 doi = html_soup.find("li", class_="field-entry doi-number doiField").find("span", class_="field-value").get_text().strip()
                 if "http://dx.doi.org" in doi:
                     doi = "https://doi.org" + doi[17:]
+            else:
+                doi = '-'
+            print(f"Raw DOI extracted: '{doi}'")
 
-            if doi_journal == '-':
-                doi_journal = doi_cutter.group(doi)
+            if doi != '-':
+                if doi_journal == '-':
+                    doi_journal = doi_cutter.group_cut(doi, "build_journal")
+                if doi_issue == "-" or doi_issue == "-":
+                    doi_issue = doi_cutter.group_cut(doi, "build_issue")
 
-
-                # doi_j, doi_i = doi_cutter.cut(doi, doi_j, doi_i)
-                # print(doi)
+            print(f"doi_journal {doi_journal}\ndoi_issue: {doi_issue}")
 
             abstract_list = []
             reference_list = []
-            if html_soup.find("div", class_="uk-margin-medium-top"):
-
-                abstract_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("p")
-                for idx, p in enumerate(abstract_list):
-                    if (p.get_text().strip().upper() == "REFERENCES:"
-                            or p.get_text().strip().upper() == "BIBLIOGRAPHY:"
-                            or p.get_text().strip().upper() == "BIBLIOGRAFIA:"):
-                        abstract_list = abstract_list[:idx]
-
-                reference_list = html_soup.find("div", class_="uk-margin-medium-top").find_all("li")
-
             abstracts = []
-            print("Abstract List")
-            print(abstract_list)
-            for idx, abstract in enumerate(abstract_list):
-                if abstract.find("strong") or abstract.find("b"):
-                    titles.append(abstract.get_text().strip())
-                if abstract.get_text().strip() == '':
-                    pass
-                else:
-                    abstracts.append(abstract.get_text().strip())
+            references = []
+            try:
+                print("in the abstract")
+                abstract_div = html_soup.find("div", class_="uk-margin-medium-top")
+
+                if abstract_div:
+                    abstract_list = abstract_div.find_all("p")
+
+                    for idx, p in enumerate(abstract_list):
+                        text = p.get_text().strip().upper()
+                        if text in ["REFERENCES:", "REFERENCES","BIBLIOGRAPHY:", "BIBLIOGRAPHY","BIBLIOGRAFIA:", "BIBLIOGRAFIA"]:
+                            abstract_list = abstract_list[:idx]
+                            break
+
+                    reference_list = abstract_div.find_all("li")
+
+                print("Abstract List")
+                print(abstract_list)
+
+                for abstract in abstract_list:
+                    if abstract.find("strong") or abstract.find("b"):
+                        titles.append(abstract.get_text().strip())
+                    text = abstract.get_text().strip()
+                    if text:
+                        abstracts.append(text)
+
+                if reference_list:
+                    references = [ref.get_text().strip() for ref in reference_list]
+
+            except Exception as e:
+                print(f"Error while parsing abstracts or references: {e}")
 
             print("Abstracts")
             print(abstracts)
             print("Titles")
             print(titles)
 
-            references = []
-            if len(reference_list) > 0:
-                references = [reference.get_text().strip() for reference in reference_list]
+            keywords = []
 
-            keywords = [keyword.get_text().strip() for keyword in html_soup.find_all("a", class_="label label-info")]
-            # print(keywords)
+            try:
+                keywords = [keyword.get_text().strip() for keyword in
+                            html_soup.find_all("a", class_="label label-info")]
+            except Exception as e:
+                print(f"Error while parsing keywords: {e}")
+            print(keywords)
 
             authors = []
             authors_dict = {}
-            for idx in range(9, 0, -1):
-                if html_soup.find("li", class_=f"field-entry author-{idx} authorField"):
-                    author = html_soup.find("li", class_=f"field-entry author-{idx} authorField").find("span", class_="field-value").get_text().strip()
-                else:
-                    author = '-'
-                if html_soup.find("li", class_=f"field-entry email-{idx} authorMail"):
-                    email = html_soup.find("li", class_=f"field-entry email-{idx} authorMail").find("span", class_="field-value").get_text().strip()
-                else:
-                    email = '-'
-                if html_soup.find("li", class_=f"field-entry institution-{idx} institutionField"):
-                    institution = html_soup.find("li", class_=f"field-entry institution-{idx} institutionField").find("span", class_="field-value").get_text().strip()
-                else:
-                    institution = '-'
-                if html_soup.find("li", class_=f"field-entry orcid-{idx} orcidField"):
-                    orcid = html_soup.find("li", class_=f"field-entry orcid-{idx} orcidField").find("span", class_="field-value").get_text().strip()
-                else:
-                    orcid = '-'
-                authors.append([author, email, institution, orcid])
+
+            try:
+                for idx in range(9, 0, -1):
+                    try:
+                        author = html_soup.find("li", class_=f"field-entry author-{idx} authorField").find("span",
+                                                                                                           class_="field-value").get_text().strip()
+                    except AttributeError:
+                        author = '-'
+
+                    try:
+                        email = html_soup.find("li", class_=f"field-entry email-{idx} authorMail").find("span",
+                                                                                                        class_="field-value").get_text().strip()
+                    except AttributeError:
+                        email = '-'
+
+                    try:
+                        institution = html_soup.find("li",
+                                                     class_=f"field-entry institution-{idx} institutionField").find(
+                            "span", class_="field-value").get_text().strip()
+                    except AttributeError:
+                        institution = '-'
+
+                    try:
+                        orcid = html_soup.find("li", class_=f"field-entry orcid-{idx} orcidField").find("span",
+                                                                                                        class_="field-value").get_text().strip()
+                    except AttributeError:
+                        orcid = '-'
+
+                    authors.append([author, email, institution, orcid])
+
+                # Filter out empty author entries
                 authors = list(filter(lambda a: a != ['-', '-', '-', '-'], authors))
+
+                # Build author dictionary
                 for auth in authors:
-                    authors_dict.update({auth[0]: {
+                    authors_dict[auth[0]] = {
                         "e-mail": auth[1],
                         "institution": auth[2],
                         "orcid": auth[3]
-                    }})
-            # print(authors)
-            # print(authors_dict)
+                    }
+
+            except Exception as e:
+                print(f"Error while parsing authors: {e}")
+
+            print(authors)
+            print(authors_dict)
 
             if y != year or i != issue:
                 if y == 0:
@@ -256,6 +298,8 @@ def get_articles_data(article_htmls, journal_dict):
 
             journal_dict.update({"doi": doi_journal,
                                  volume: volume_dict})
+
+            doi_issue = "-"
         except Exception as e:
             print(f"Skipping article due to error: {e}\nHTML: {html}")
             continue
